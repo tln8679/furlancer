@@ -1,6 +1,7 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -10,10 +11,14 @@ import {
   Link,
   Pagination,
   Stack,
+  TextField,
   Typography,
-} from '@mui/material';
-import { cats } from './metadata/cats';
-import { dogs } from './metadata/dogs';
+  useMediaQuery,
+} from "@mui/material";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import InfoIcon from "@mui/icons-material/Info";
+import { cats } from "../../libs/shared/metadata/cats";
+import { dogs } from "../../libs/shared/metadata/dogs";
 
 export default function BreedResults() {
   const location = useLocation();
@@ -24,114 +29,212 @@ export default function BreedResults() {
     species,
     minWeight,
     maxWeight,
-    activity,
-    price,
-    sheds,
-    grooming,
-    trainability,
-    barks,
     affectionate,
-    talkative,
     hypoallergenic,
     kidFriendly,
+    activityLevelLow,
+    activityLevelMedium,
+    activityLevelHigh,
+    sheddingLevelLow,
+    sheddingLevelMedium,
+    sheddingLevelHigh,
+    groomingLow,
+    groomingHigh,
+    groomingMedium,
+    trainabilityEasy,
+    trainabilityDifficult,
+    trainabilityModerate,
+    barksLow,
+    barksMedium,
+    barksHigh,
+    talkativeChatty,
+    talkativeQuiet,
   } = formState;
 
-  const allBreeds = species === 'dog' ? dogs : cats;
+  const allBreeds = species === "dog" ? dogs : cats;
 
-  const filteredResults = allBreeds.filter((breed: any) => {
-    const weightOk =
-      parseInt(breed.minWeight) >= parseInt(minWeight) &&
-      parseInt(breed.maxWeight) <= parseInt(maxWeight);
+  const filteredResults = useMemo(
+    () =>
+      allBreeds
+        .filter((breed: any) => {
+          const weightOk =
+            (!minWeight || parseInt(breed.minWeight) >= parseInt(minWeight)) &&
+            (!maxWeight || parseInt(breed.maxWeight) <= parseInt(maxWeight));
 
-    const matches =
-      breed.activity === activity &&
-      breed.price === price &&
-      breed.sheds === sheds &&
-      breed.grooming === grooming &&
-      breed.hypoallergenic === hypoallergenic &&
-      breed.kidFriendly === kidFriendly;
+          const matches =
+            (hypoallergenic !== true || breed.hypoallergenic === true) &&
+            (kidFriendly !== true || breed.kidFriendly === true);
 
-    const extraDogMatch =
-      species === 'dog'
-        ? breed.trainability === trainability && breed.barks === barks
-        : true;
+          // Activity
+          const activitySelected =
+            activityLevelLow || activityLevelMedium || activityLevelHigh;
+          const activityMatch =
+            !activitySelected ||
+            (activityLevelLow && breed.activity === "low") ||
+            (activityLevelMedium && breed.activity === "medium") ||
+            (activityLevelHigh && breed.activity === "high");
 
-    const extraCatMatch =
-      species === 'cat'
-        ? breed.talkative === talkative && breed.affectionate === affectionate
-        : true;
+          // Shedding
+          const sheddingSelected =
+            sheddingLevelLow || sheddingLevelMedium || sheddingLevelHigh;
+          const sheddingMatch =
+            !sheddingSelected ||
+            (sheddingLevelLow && breed.sheds === "none") ||
+            (sheddingLevelMedium && breed.sheds === "little") ||
+            (sheddingLevelHigh && breed.sheds === "lot");
 
-    return weightOk && matches && extraDogMatch && extraCatMatch;
-  });
+          // Grooming
+          const groomingSelected =
+            groomingLow || groomingMedium || groomingHigh;
+          const groomingMatch =
+            !groomingSelected ||
+            (groomingLow && breed.grooming === "low") ||
+            (groomingMedium && breed.grooming === "medium") ||
+            (groomingHigh && breed.grooming === "high");
 
-  const [showAll, setShowAll] = useState(false);
+          // Dog-specific
+          const trainabilitySelected =
+            trainabilityEasy || trainabilityModerate || trainabilityDifficult;
+          const trainabilityMatch =
+            !trainabilitySelected ||
+            (trainabilityEasy && breed.trainability === "easy") ||
+            (trainabilityModerate && breed.trainability === "moderate") ||
+            (trainabilityDifficult && breed.trainability === "difficult");
+
+          const barkingSelected = barksLow || barksMedium || barksHigh;
+          const barkingMatch =
+            !barkingSelected ||
+            (barksLow && breed.barks === "low") ||
+            (barksMedium && breed.barks === "medium") ||
+            (barksHigh && breed.barks === "high");
+
+          // Cat-specific
+          const talkativeSelected = talkativeQuiet || talkativeChatty;
+          const talkativeMatch =
+            !talkativeSelected ||
+            (talkativeQuiet && breed.talkative === "quiet") ||
+            (talkativeChatty && breed.talkative === "chatty");
+
+          const affectionateMatch =
+            species !== "cat" || !affectionate || breed.affectionate === true;
+
+          const dogMatch =
+            species === "dog" ? trainabilityMatch && barkingMatch : true;
+          const catMatch =
+            species === "cat" ? talkativeMatch && affectionateMatch : true;
+
+          return (
+            weightOk &&
+            matches &&
+            activityMatch &&
+            sheddingMatch &&
+            groomingMatch &&
+            dogMatch &&
+            catMatch
+          );
+        })
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [
+      species,
+      minWeight,
+      maxWeight,
+      activityLevelLow,
+      activityLevelMedium,
+      activityLevelHigh,
+      sheddingLevelLow,
+      sheddingLevelMedium,
+      sheddingLevelHigh,
+      groomingLow,
+      groomingMedium,
+      groomingHigh,
+      trainabilityEasy,
+      trainabilityModerate,
+      trainabilityDifficult,
+      barksLow,
+      barksMedium,
+      barksHigh,
+      talkativeQuiet,
+      talkativeChatty,
+      affectionate,
+      hypoallergenic,
+      kidFriendly,
+      allBreeds,
+    ]
+  );
+
   const [page, setPage] = useState(1);
-  const itemsPerPage = 20;
+  const [searchText, setSearchText] = useState("");
+  const [expandedBreeds, setExpandedBreeds] = useState<Record<string, boolean>>(
+    {}
+  );
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const MOBILE_TEXT_LENGTH = 100;
+  const DESKTOP_TEXT_LENGTH = 250;
 
-  const displayedResults = showAll
-    ? allBreeds.slice((page - 1) * itemsPerPage, page * itemsPerPage)
-    : filteredResults;
+  const itemsPerPage = 10;
 
-  const totalPages = Math.ceil(allBreeds.length / itemsPerPage);
+  const breedNameFilteredResults = useMemo(() => {
+    if (!searchText) return filteredResults;
+    return filteredResults.filter((breed: any) =>
+      breed.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [filteredResults, searchText]);
+
+  const totalPages = Math.ceil(breedNameFilteredResults.length / itemsPerPage);
+
+  const displayedResults = useMemo(() => {
+    const source = breedNameFilteredResults;
+    const start = (page - 1) * itemsPerPage;
+    const end = page * itemsPerPage;
+    return source.slice(start, end);
+  }, [breedNameFilteredResults, page]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
 
   return (
     <Box sx={{ p: 4 }}>
       <Stack direction="row" spacing={2} mb={3}>
         <Button
           variant="outlined"
-          onClick={() =>
-            navigate('/', {
-              state: {
-                species,
-                minWeight,
-                maxWeight,
-                activity,
-                price,
-                sheds,
-                grooming,
-                trainability,
-                barks,
-                affectionate,
-                talkative,
-                hypoallergenic,
-                kidFriendly,
-              },
-            })
-          }
+          onClick={() => navigate("/", { state: formState })}
         >
           ← Back to Search
         </Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setShowAll(true);
-            setPage(1);
-          }}
-        >
-          Show All {species === 'dog' ? 'Dogs' : 'Cats'}
-        </Button>
       </Stack>
 
-      {!showAll && (
-        <Typography variant="h4" gutterBottom>
-          {filteredResults.length > 0
-            ? `🎉 ${filteredResults.length} ${species} breeds found`
-            : `😿 No ${species} breeds matched your filters`}
-        </Typography>
-      )}
-
-      {showAll && (
-        <>
-          <Typography variant="h4" gutterBottom>
-            All {species}s ({allBreeds.length})
-          </Typography>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={(_, value) => setPage(value)}
+      <Autocomplete
+        freeSolo
+        options={filteredResults.map((breed: any) => breed.name)}
+        value={searchText}
+        onInputChange={(_, value) => {
+          setSearchText(value);
+          setPage(1);
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Filter by Breed Name"
+            fullWidth
             sx={{ mb: 3 }}
           />
-        </>
+        )}
+      />
+
+      <Typography variant="h4" gutterBottom>
+        {breedNameFilteredResults.length > 0
+          ? `🎉 ${breedNameFilteredResults.length} ${species} breeds found`
+          : `😿 No ${species} breeds matched your filters. Please narrow your search filters to ensure results.`}
+      </Typography>
+
+      {breedNameFilteredResults.length > 0 && (
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(_, value) => setPage(value)}
+          sx={{ mb: 3 }}
+        />
       )}
 
       <Stack spacing={3}>
@@ -142,44 +245,144 @@ export default function BreedResults() {
               height="160"
               image={
                 breed.image ||
-                (species === 'dog' ? '/defaultdog.png' : '/defaultcat.png')
+                (species === "dog" ? "defaultdog.png" : "defaultcat.png")
               }
               alt={breed.name}
-              sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5' }}
+              sx={{ objectFit: "contain", backgroundColor: "#f5f5f5" }}
             />
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 {breed.name}
               </Typography>
-              <Link href={breed.usefulLink} target="_blank" rel="noopener">
-                Learn more
-              </Link>
+
+              {breed.personality && (
+                <Box mt={1}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ whiteSpace: "pre-line" }}
+                  >
+                    {expandedBreeds[breed.name]
+                      ? breed.personality
+                      : isMobile
+                        ? `${breed.personality.slice(0, MOBILE_TEXT_LENGTH)}${
+                            breed.personality.length > MOBILE_TEXT_LENGTH
+                              ? "..."
+                              : ""
+                          }`
+                        : `${breed.personality.slice(0, DESKTOP_TEXT_LENGTH)}${
+                            breed.personality.length > DESKTOP_TEXT_LENGTH
+                              ? "..."
+                              : ""
+                          }`}
+                  </Typography>
+
+                  {isMobile
+                    ? breed.personality.length > MOBILE_TEXT_LENGTH && (
+                        <Link
+                          component="button"
+                          variant="body2"
+                          sx={{ mt: 0.5 }}
+                          onClick={() =>
+                            setExpandedBreeds(
+                              (prev: Record<string, boolean>) => ({
+                                ...prev,
+                                [breed.name]: !prev[breed.name],
+                              })
+                            )
+                          }
+                        >
+                          {expandedBreeds[breed.name] ? "See less" : "See more"}
+                        </Link>
+                      )
+                    : breed.personality.length > DESKTOP_TEXT_LENGTH && (
+                        <Link
+                          component="button"
+                          variant="body2"
+                          sx={{ mt: 0.5 }}
+                          onClick={() =>
+                            setExpandedBreeds(
+                              (prev: Record<string, boolean>) => ({
+                                ...prev,
+                                [breed.name]: !prev[breed.name],
+                              })
+                            )
+                          }
+                        >
+                          {expandedBreeds[breed.name] ? "See less" : "See more"}
+                        </Link>
+                      )}
+                </Box>
+              )}
+
+              <Box display="flex" flexDirection="column" gap={0.5} mb={1}>
+                {breed.valid && (
+                  <Link
+                    href={breed.petFinderLink}
+                    target="_blank"
+                    rel="noopener"
+                    display="flex"
+                    alignItems="center"
+                    gap={0.5}
+                  >
+                    <OpenInNewIcon fontSize="small" />
+                    {`Find your future ${breed.name} on Petfinder`}
+                  </Link>
+                )}
+                <Link
+                  href={breed.usefulLink}
+                  target="_blank"
+                  rel="noopener"
+                  display="flex"
+                  alignItems="center"
+                  gap={0.5}
+                >
+                  <InfoIcon fontSize="small" />
+                  Learn more
+                </Link>
+              </Box>
+
               <Box mt={1} display="flex" flexWrap="wrap" gap={1}>
                 <Chip label={`Activity: ${breed.activity}`} />
                 <Chip label={`Grooming: ${breed.grooming}`} />
                 <Chip label={`Sheds: ${breed.sheds}`} />
-                <Chip label={`$: ${breed.price}`} />
                 <Chip
                   label={`Weight: ${breed.minWeight}-${breed.maxWeight} lbs`}
                 />
+                <Chip
+                  label={`Hypoallergenic: ${breed.hypoallergenic ? "Yes" : "No"}`}
+                />
+                <Chip
+                  label={`Kid Friendly: ${breed.kidFriendly ? "Yes" : "No"}`}
+                />
+                {breed.trainability && (
+                  <Chip label={`Trainability: ${breed.trainability}`} />
+                )}
+                {breed.barks && <Chip label={`Barks: ${breed.barks}`} />}
+                {breed.talkative && (
+                  <Chip label={`Talkative: ${breed.talkative}`} />
+                )}
+                {"affectionate" in breed && (
+                  <Chip
+                    label={`Affectionate: ${breed.affectionate ? "Yes" : "No"}`}
+                  />
+                )}
+                {breed.valid === false && (
+                  <Chip label="Not verified" color="warning" />
+                )}
               </Box>
             </CardContent>
           </Card>
         ))}
       </Stack>
 
-      {showAll && (
-        <>
-          <Typography variant="h4" gutterBottom sx={{ mt: 4 }}>
-            All {species}s ({allBreeds.length})
-          </Typography>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={(_, value) => setPage(value)}
-            sx={{ mb: 3 }}
-          />
-        </>
+      {breedNameFilteredResults.length > 0 && (
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(_, value) => setPage(value)}
+          sx={{ mb: 3 }}
+        />
       )}
     </Box>
   );

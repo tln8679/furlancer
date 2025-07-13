@@ -5,34 +5,56 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
-  InputLabel,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
   Snackbar,
   Stack,
   Switch,
   TextField,
   Typography,
   Alert,
+  ToggleButtonGroup,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PetsIcon from "@mui/icons-material/Pets";
+import StarIcon from "@mui/icons-material/Star";
+import TuneIcon from "@mui/icons-material/Tune";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import WavesIcon from "@mui/icons-material/Waves";
+import ContentCutIcon from "@mui/icons-material/ContentCut";
+import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import ChatIcon from "@mui/icons-material/Chat";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { StyledToggleButton } from "../StyledToggleButton/StyledToggleButton";
 
 type Species = "dog" | "cat";
 
 type FormData = {
   minWeight: string;
   maxWeight: string;
-  activity: string;
-  price: string;
-  sheds: string;
-  trainability: string;
-  barks: string;
+  activityLevelLow: boolean;
+  activityLevelMedium: boolean;
+  activityLevelHigh: boolean;
+  sheddingLevelLow: boolean;
+  sheddingLevelMedium: boolean;
+  sheddingLevelHigh: boolean;
+  groomingLow: boolean;
+  groomingMedium: boolean;
+  groomingHigh: boolean;
+  trainabilityEasy: boolean;
+  trainabilityModerate: boolean;
+  trainabilityDifficult: boolean;
+  barksLow: boolean;
+  barksMedium: boolean;
+  barksHigh: boolean;
+  talkativeQuiet: boolean;
+  talkativeChatty: boolean;
   affectionate: boolean;
-  talkative: string;
-  grooming: string;
   hypoallergenic: boolean;
   kidFriendly: boolean;
 };
@@ -45,16 +67,26 @@ export default function BreedSearch() {
   const [formData, setFormData] = useState<FormData>({
     minWeight: "",
     maxWeight: "",
-    activity: "",
-    price: "",
-    sheds: "",
-    grooming: "",
-    trainability: "",
-    barks: "",
     affectionate: false,
-    talkative: "",
     hypoallergenic: false,
     kidFriendly: false,
+    activityLevelLow: false,
+    activityLevelMedium: false,
+    activityLevelHigh: false,
+    sheddingLevelLow: false,
+    sheddingLevelMedium: false,
+    sheddingLevelHigh: false,
+    groomingLow: false,
+    groomingMedium: false,
+    groomingHigh: false,
+    trainabilityEasy: false,
+    trainabilityModerate: false,
+    trainabilityDifficult: false,
+    barksLow: false,
+    barksMedium: false,
+    barksHigh: false,
+    talkativeQuiet: false,
+    talkativeChatty: false,
   });
 
   const [errors, setErrors] = useState<
@@ -82,32 +114,26 @@ export default function BreedSearch() {
       setFormData({
         minWeight: state.minWeight ?? "",
         maxWeight: state.maxWeight ?? "",
-        activity: state.activity ?? "",
-        price: state.price ?? "",
-        sheds: state.sheds ?? "",
-        grooming: state.grooming ?? "",
-        trainability: state.trainability ?? "",
-        barks: state.barks ?? "",
         affectionate: state.affectionate ?? false,
-        talkative: state.talkative ?? "",
         hypoallergenic: state.hypoallergenic ?? false,
         kidFriendly: state.kidFriendly ?? false,
-      });
-    } else {
-      setSpecies("dog");
-      setFormData({
-        minWeight: "",
-        maxWeight: "",
-        activity: "",
-        price: "",
-        sheds: "",
-        grooming: "",
-        trainability: "",
-        barks: "",
-        affectionate: false,
-        talkative: "",
-        hypoallergenic: false,
-        kidFriendly: false,
+        activityLevelLow: state.activityLevelLow ?? false,
+        activityLevelMedium: state.activityLevelMedium ?? false,
+        activityLevelHigh: state.activityLevelHigh ?? false,
+        sheddingLevelLow: state.sheddingLevelLow ?? false,
+        sheddingLevelMedium: state.sheddingLevelMedium ?? false,
+        sheddingLevelHigh: state.sheddingLevelHigh ?? false,
+        groomingLow: state.groomingLow ?? false,
+        groomingMedium: state.groomingMedium ?? false,
+        groomingHigh: state.groomingHigh ?? false,
+        trainabilityEasy: state.trainabilityEasy ?? false,
+        trainabilityModerate: state.trainabilityModerate ?? false,
+        trainabilityDifficult: state.trainabilityDifficult ?? false,
+        barksLow: state.barksLow ?? false,
+        barksMedium: state.barksMedium ?? false,
+        barksHigh: state.barksHigh ?? false,
+        talkativeQuiet: state.talkativeQuiet ?? false,
+        talkativeChatty: state.talkativeChatty ?? false,
       });
     }
   }, [location.key]);
@@ -121,18 +147,7 @@ export default function BreedSearch() {
   };
 
   const validateFields = () => {
-    const requiredFields: (keyof FormData)[] = [
-      "minWeight",
-      "maxWeight",
-      "activity",
-      "price",
-      "sheds",
-      "grooming",
-      ...(species === "dog"
-        ? (["trainability", "barks"] as (keyof FormData)[])
-        : []),
-      ...(species === "cat" ? (["talkative"] as (keyof FormData)[]) : []),
-    ];
+    const requiredFields: (keyof FormData)[] = [];
 
     const newErrors: Partial<Record<keyof FormData, boolean>> = {};
     requiredFields.forEach((field) => {
@@ -162,6 +177,34 @@ export default function BreedSearch() {
     }
   };
 
+  const handleClear = () => {
+    setFormData({
+      minWeight: "",
+      maxWeight: "",
+      affectionate: false,
+      hypoallergenic: false,
+      kidFriendly: false,
+      activityLevelLow: false,
+      activityLevelMedium: false,
+      activityLevelHigh: false,
+      sheddingLevelLow: false,
+      sheddingLevelMedium: false,
+      sheddingLevelHigh: false,
+      groomingLow: false,
+      groomingMedium: false,
+      groomingHigh: false,
+      trainabilityEasy: false,
+      trainabilityModerate: false,
+      trainabilityDifficult: false,
+      barksLow: false,
+      barksMedium: false,
+      barksHigh: false,
+      talkativeQuiet: false,
+      talkativeChatty: false,
+    });
+    setErrors({});
+  };
+
   return (
     <>
       <Box
@@ -179,173 +222,399 @@ export default function BreedSearch() {
         <Typography variant="h5" gutterBottom>
           🐾 Find Your Perfect {species === "dog" ? "Dog" : "Cat"} Breed
         </Typography>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Tip: The more filters you apply, the fewer breeds will match. Try
+          loosening one or two if you don’t see results.
+        </Typography>
 
-        <Stack spacing={2} alignItems="stretch">
+        <Stack spacing={3}>
+          {/* Species Toggle */}
           <FormControl component="fieldset">
-            <FormLabel>Dog or Cat</FormLabel>
-            <RadioGroup
-              row
+            <FormLabel>
+              <PetsIcon fontSize="small" sx={{ mr: 1 }} /> Choose Species
+            </FormLabel>
+            <ToggleButtonGroup
               value={species}
-              onChange={(e) => setSpecies(e.target.value as Species)}
+              exclusive
+              onChange={(_e, value) => {
+                if (value) setSpecies(value);
+              }}
+              sx={{ mt: 1 }}
             >
-              <FormControlLabel value="dog" control={<Radio />} label="Dog" />
-              <FormControlLabel value="cat" control={<Radio />} label="Cat" />
-            </RadioGroup>
+              <StyledToggleButton value="dog">
+                <img src="defaultdog.png" alt="Dog" />
+                Dog
+              </StyledToggleButton>
+              <StyledToggleButton value="cat">
+                <img src="defaultcat.png" alt="Cat" />
+                Cat
+              </StyledToggleButton>
+            </ToggleButtonGroup>
           </FormControl>
 
+          {/* Weight */}
           <TextField
             label="Min Weight (lbs)"
             type="number"
             value={formData.minWeight}
             onChange={(e) => handleChange("minWeight", e.target.value)}
             error={!!errors.minWeight}
-            required
           />
-
           <TextField
             label="Max Weight (lbs)"
             type="number"
             value={formData.maxWeight}
             onChange={(e) => handleChange("maxWeight", e.target.value)}
             error={!!errors.maxWeight}
-            required
           />
 
-          <FormControl error={!!errors.activity} required>
-            <InputLabel>Activity Level</InputLabel>
-            <Select
-              value={formData.activity}
-              onChange={(e) => handleChange("activity", e.target.value)}
-              label="Activity Level"
-            >
-              <MenuItem value="low">Low</MenuItem>
-              <MenuItem value="medium">Medium</MenuItem>
-              <MenuItem value="high">High</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl error={!!errors.price} required>
-            <InputLabel>Price</InputLabel>
-            <Select
-              value={formData.price}
-              onChange={(e) => handleChange("price", e.target.value)}
-              label="Price"
-            >
-              <MenuItem value="$">💲</MenuItem>
-              <MenuItem value="$$">💲💲</MenuItem>
-              <MenuItem value="$$$">💲💲💲</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl error={!!errors.sheds} required>
-            <InputLabel>Sheds</InputLabel>
-            <Select
-              value={formData.sheds}
-              onChange={(e) => handleChange("sheds", e.target.value)}
-              label="Sheds"
-            >
-              <MenuItem value="none">None</MenuItem>
-              <MenuItem value="little">A little</MenuItem>
-              <MenuItem value="lot">A lot</MenuItem>
-            </Select>
-          </FormControl>
-
-          {species === "dog" && (
-            <>
-              <FormControl error={!!errors.trainability} required>
-                <InputLabel>Trainability</InputLabel>
-                <Select
-                  value={formData.trainability}
-                  onChange={(e) => handleChange("trainability", e.target.value)}
-                  label="Trainability"
-                >
-                  <MenuItem value="easy">Easy</MenuItem>
-                  <MenuItem value="moderate">Moderate</MenuItem>
-                  <MenuItem value="difficult">Stubborn</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl error={!!errors.barks} required>
-                <InputLabel>Barks A Lot?</InputLabel>
-                <Select
-                  value={formData.barks}
-                  onChange={(e) => handleChange("barks", e.target.value)}
-                  label="Barks A Lot?"
-                >
-                  <MenuItem value="low">Low</MenuItem>
-                  <MenuItem value="medium">Medium</MenuItem>
-                  <MenuItem value="high">High</MenuItem>
-                </Select>
-              </FormControl>
-            </>
-          )}
-
-          {species === "cat" && (
-            <>
-              <FormControl error={!!errors.talkative} required>
-                <InputLabel>Talkativeness</InputLabel>
-                <Select
-                  value={formData.talkative}
-                  onChange={(e) => handleChange("talkative", e.target.value)}
-                  label="Talkativeness"
-                >
-                  <MenuItem value="quiet">Quiet</MenuItem>
-                  <MenuItem value="chatty">Chatty</MenuItem>
-                </Select>
-              </FormControl>
-
+          {/* General Traits */}
+          <FormControl component="fieldset">
+            <FormLabel>
+              <StarIcon fontSize="small" sx={{ mr: 1 }} /> General Traits
+            </FormLabel>
+            <Stack spacing={1.5} sx={{ mt: 1 }}>
               <FormControlLabel
                 control={
-                  <Switch
-                    checked={formData.affectionate}
+                  <Checkbox
+                    checked={formData.hypoallergenic}
                     onChange={(e) =>
-                      handleChange("affectionate", e.target.checked)
+                      handleChange("hypoallergenic", e.target.checked)
                     }
                   />
                 }
-                label="Affectionate"
+                label="Hypoallergenic"
               />
-            </>
-          )}
-
-          <FormControl error={!!errors.grooming} required>
-            <InputLabel>Grooming Needs</InputLabel>
-            <Select
-              value={formData.grooming}
-              onChange={(e) => handleChange("grooming", e.target.value)}
-              label="Grooming Needs"
-            >
-              <MenuItem value="low">Low</MenuItem>
-              <MenuItem value="medium">Medium</MenuItem>
-              <MenuItem value="high">High</MenuItem>
-            </Select>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.kidFriendly}
+                    onChange={(e) =>
+                      handleChange("kidFriendly", e.target.checked)
+                    }
+                  />
+                }
+                label="Kid Friendly"
+              />
+            </Stack>
           </FormControl>
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.hypoallergenic}
-                onChange={(e) =>
-                  handleChange("hypoallergenic", e.target.checked)
-                }
-              />
-            }
-            label="Hypoallergenic"
-          />
+          {/* Advanced Filters Accordion */}
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="advanced-content"
+              id="advanced-header"
+            >
+              <Typography sx={{ display: "flex", alignItems: "center" }}>
+                <TuneIcon fontSize="small" sx={{ mr: 1 }} />
+                More Filters
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={3}>
+                {/* Activity Level */}
+                <FormControl component="fieldset">
+                  <FormLabel>
+                    <DirectionsRunIcon fontSize="small" sx={{ mr: 1 }} />{" "}
+                    Activity Level
+                  </FormLabel>
+                  <Stack spacing={1.5} sx={{ mt: 1 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.activityLevelLow}
+                          onChange={(e) =>
+                            handleChange("activityLevelLow", e.target.checked)
+                          }
+                        />
+                      }
+                      label="Needs little activity"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.activityLevelMedium}
+                          onChange={(e) =>
+                            handleChange(
+                              "activityLevelMedium",
+                              e.target.checked
+                            )
+                          }
+                        />
+                      }
+                      label="Needs moderate activity"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.activityLevelHigh}
+                          onChange={(e) =>
+                            handleChange("activityLevelHigh", e.target.checked)
+                          }
+                        />
+                      }
+                      label="Needs a lot of activity"
+                    />
+                  </Stack>
+                </FormControl>
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.kidFriendly}
-                onChange={(e) => handleChange("kidFriendly", e.target.checked)}
-              />
-            }
-            label="Kid Friendly"
-          />
+                {/* Shedding */}
+                <FormControl component="fieldset">
+                  <FormLabel>
+                    <WavesIcon fontSize="small" sx={{ mr: 1 }} /> Shedding
+                  </FormLabel>
+                  <Stack spacing={1.5} sx={{ mt: 1 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.sheddingLevelLow}
+                          onChange={(e) =>
+                            handleChange("sheddingLevelLow", e.target.checked)
+                          }
+                        />
+                      }
+                      label="Doesn't shed"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.sheddingLevelMedium}
+                          onChange={(e) =>
+                            handleChange(
+                              "sheddingLevelMedium",
+                              e.target.checked
+                            )
+                          }
+                        />
+                      }
+                      label="Sheds a little"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.sheddingLevelHigh}
+                          onChange={(e) =>
+                            handleChange("sheddingLevelHigh", e.target.checked)
+                          }
+                        />
+                      }
+                      label="Sheds a lot"
+                    />
+                  </Stack>
+                </FormControl>
 
-          <Button variant="contained" color="primary" onClick={handleSearch}>
-            Search Breeds
-          </Button>
+                {/* Grooming */}
+                <FormControl component="fieldset">
+                  <FormLabel>
+                    <ContentCutIcon fontSize="small" sx={{ mr: 1 }} /> Grooming
+                    Needs
+                  </FormLabel>
+                  <Stack spacing={1.5} sx={{ mt: 1 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.groomingLow}
+                          onChange={(e) =>
+                            handleChange("groomingLow", e.target.checked)
+                          }
+                        />
+                      }
+                      label="Low grooming needs"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.groomingMedium}
+                          onChange={(e) =>
+                            handleChange("groomingMedium", e.target.checked)
+                          }
+                        />
+                      }
+                      label="Moderate grooming needs"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.groomingHigh}
+                          onChange={(e) =>
+                            handleChange("groomingHigh", e.target.checked)
+                          }
+                        />
+                      }
+                      label="High grooming needs"
+                    />
+                  </Stack>
+                </FormControl>
+
+                {species === "dog" && (
+                  <>
+                    {/* Trainability */}
+                    <FormControl component="fieldset">
+                      <FormLabel>
+                        <EmojiObjectsIcon fontSize="small" sx={{ mr: 1 }} />{" "}
+                        Trainability
+                      </FormLabel>
+                      <Stack spacing={1.5} sx={{ mt: 1 }}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.trainabilityEasy}
+                              onChange={(e) =>
+                                handleChange(
+                                  "trainabilityEasy",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                          }
+                          label="Easy to train"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.trainabilityModerate}
+                              onChange={(e) =>
+                                handleChange(
+                                  "trainabilityModerate",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                          }
+                          label="Moderately trainable"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.trainabilityDifficult}
+                              onChange={(e) =>
+                                handleChange(
+                                  "trainabilityDifficult",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                          }
+                          label="Difficult to train"
+                        />
+                      </Stack>
+                    </FormControl>
+
+                    {/* Barking */}
+                    <FormControl component="fieldset">
+                      <FormLabel>
+                        <VolumeUpIcon fontSize="small" sx={{ mr: 1 }} /> Barking
+                      </FormLabel>
+                      <Stack spacing={1.5} sx={{ mt: 1 }}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.barksLow}
+                              onChange={(e) =>
+                                handleChange("barksLow", e.target.checked)
+                              }
+                            />
+                          }
+                          label="Rarely barks"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.barksMedium}
+                              onChange={(e) =>
+                                handleChange("barksMedium", e.target.checked)
+                              }
+                            />
+                          }
+                          label="Barks sometimes"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.barksHigh}
+                              onChange={(e) =>
+                                handleChange("barksHigh", e.target.checked)
+                              }
+                            />
+                          }
+                          label="Barks a lot"
+                        />
+                      </Stack>
+                    </FormControl>
+                  </>
+                )}
+
+                {species === "cat" && (
+                  <>
+                    {/* Talkative */}
+                    <FormControl component="fieldset">
+                      <FormLabel>
+                        <ChatIcon fontSize="small" sx={{ mr: 1 }} />{" "}
+                        Talkativeness
+                      </FormLabel>
+                      <Stack spacing={1.5} sx={{ mt: 1 }}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.talkativeQuiet}
+                              onChange={(e) =>
+                                handleChange("talkativeQuiet", e.target.checked)
+                              }
+                            />
+                          }
+                          label="Quiet"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.talkativeChatty}
+                              onChange={(e) =>
+                                handleChange(
+                                  "talkativeChatty",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                          }
+                          label="Talkative"
+                        />
+                      </Stack>
+                    </FormControl>
+
+                    {/* Affection */}
+                    <FormControl component="fieldset">
+                      <FormLabel>
+                        <FavoriteIcon fontSize="small" sx={{ mr: 1 }} />{" "}
+                        Affection
+                      </FormLabel>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={formData.affectionate}
+                            onChange={(e) =>
+                              handleChange("affectionate", e.target.checked)
+                            }
+                          />
+                        }
+                        label="Affectionate"
+                      />
+                    </FormControl>
+                  </>
+                )}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Action Buttons */}
+          <Stack direction="row" spacing={2} justifyContent="space-between">
+            <Button variant="outlined" color="primary" onClick={handleClear}>
+              Clear Filters
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleSearch}>
+              Search Breeds
+            </Button>
+          </Stack>
         </Stack>
       </Box>
 

@@ -28,6 +28,7 @@ import FoodReviews from "./pages/FoodReviews/FoodReviews";
 import Home from "./pages/Home/Home";
 import UserAgreement from "./pages/UserAgreement/UserAgreement.tsx";
 import BreedResults from "./pages/BreedResults/BreedResults.tsx";
+import Quiz from "./pages/Quiz/Quiz/Quiz.tsx";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -43,6 +44,7 @@ function App() {
     { to: "/insurance-reviews", label: "Insurance Reviews" },
     { to: "/food-reviews", label: "Food Reviews" },
     { to: "/user-agreement", label: "User Agreement" },
+    { to: "/quiz", label: "Find Your Breed Quiz" }, 
   ];
 
   return (
@@ -111,7 +113,8 @@ function App() {
 
       <Box className="container fade-slide-in">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="" element={<Home />} />
+          <Route path="/quiz" element={<Quiz />} />
           <Route path="/insurance-reviews" element={<InsuranceReviews />} />
           <Route path="/food-reviews" element={<FoodReviews />} />
           <Route path="/about" element={<About />} />
