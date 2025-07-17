@@ -64,8 +64,9 @@ export default function Quiz() {
       }
       return { ...breed, score };
     });
-
-    return scores.sort((a, b) => b.score - a.score)[0];
+    // shuffle so that it's not always the same breed for the same choices
+    const shuffled = scores.sort(() => Math.random() - 0.5);
+    return shuffled.sort((a, b) => b.score - a.score)[0];
   }
 
   function shareResult() {
